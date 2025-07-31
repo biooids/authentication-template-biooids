@@ -125,6 +125,7 @@ exports.Prisma.UserScalarFieldEnum = {
   name: 'name',
   username: 'username',
   email: 'email',
+  emailVerified: 'emailVerified',
   hashedPassword: 'hashedPassword',
   bio: 'bio',
   title: 'title',
@@ -139,6 +140,22 @@ exports.Prisma.UserScalarFieldEnum = {
   githubUrl: 'githubUrl',
   linkedinUrl: 'linkedinUrl',
   websiteUrl: 'websiteUrl'
+};
+
+exports.Prisma.PasswordResetTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  userId: 'userId'
+};
+
+exports.Prisma.EmailVerificationTokenScalarFieldEnum = {
+  id: 'id',
+  token: 'token',
+  expiresAt: 'expiresAt',
+  createdAt: 'createdAt',
+  userId: 'userId'
 };
 
 exports.Prisma.RefreshTokenScalarFieldEnum = {
@@ -190,6 +207,8 @@ exports.ThemePreference = exports.$Enums.ThemePreference = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  PasswordResetToken: 'PasswordResetToken',
+  EmailVerificationToken: 'EmailVerificationToken',
   RefreshToken: 'RefreshToken',
   UserSettings: 'UserSettings'
 };

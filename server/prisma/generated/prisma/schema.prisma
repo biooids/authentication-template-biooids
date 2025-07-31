@@ -1,9 +1,6 @@
 // This is your Prisma schema file,
 // learn more about it in the docs: https://pris.ly/d/prisma-schema
 
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
   output   = "./generated/prisma"
@@ -14,36 +11,61 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ===============================================
-// ===      USER & AUTHENTICATION MODELS       ===
-// ===============================================
-
 model User {
-  id             String   @id @default(uuid())
+  id             String     @id @default(uuid())
   name           String
-  username       String   @unique
-  email          String   @unique
+  username       String     @unique
+  email          String     @unique
+  // --- ADDED: Field to track if the user's email is verified ---
+  emailVerified  Boolean    @default(false)
   hashedPassword String?
   bio            String?
   title          String?
   location       String?
-  profileImage   String?  @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
-  bannerImage    String?  @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
-  joinedAt       DateTime @default(now()) @map("joined_at")
-  updatedAt      DateTime @updatedAt
+  profileImage   String?    @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
+  bannerImage    String?    @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
+  joinedAt       DateTime   @default(now()) @map("joined_at")
+  updatedAt      DateTime   @updatedAt
+  systemRole     SystemRole @default(USER)
+  deactivatedAt  DateTime?
+  twitterUrl     String?
+  githubUrl      String?
+  linkedinUrl    String?
+  websiteUrl     String?
 
-  systemRole    SystemRole @default(USER)
-  deactivatedAt DateTime?
-
-  twitterUrl  String?
-  githubUrl   String?
-  linkedinUrl String?
-  websiteUrl  String?
-
-  refreshTokens RefreshToken[]
-  settings      UserSettings?
+  refreshTokens           RefreshToken[]
+  settings                UserSettings?
+  passwordResetTokens     PasswordResetToken[]
+  // --- ADDED: Relation for email verification tokens ---
+  emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
+}
+
+// --- ADDED: New model for password reset tokens ---
+model PasswordResetToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+// --- ADDED: New model for email verification tokens ---
+model EmailVerificationToken {
+  id        String   @id @default(uuid())
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("email_verification_tokens")
 }
 
 model RefreshToken {
@@ -72,10 +94,6 @@ model UserSettings {
 
   @@map("user_settings")
 }
-
-// ===============================================
-// ===             ENUMERATIONS                ===
-// ===============================================
 
 enum SystemRole {
   USER
