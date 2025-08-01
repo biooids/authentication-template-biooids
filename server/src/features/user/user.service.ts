@@ -1,15 +1,18 @@
-// src/features/user/user.service.ts
+// FILE: server/src/features/user/user.service.ts (FULL & COMPLETE)
+
 import bcrypt from "bcryptjs";
 import { Prisma, User } from "@/prisma-client";
 import prisma from "../../db/prisma.js";
 import { SignUpInputDto } from "../../types/auth.types.js";
 import { createHttpError } from "../../utils/error.factory.js";
 import { logger } from "../../config/logger.js";
-import { deleteFromCloudinary } from "../../config/cloudinary";
+import { deleteFromCloudinary } from "../../config/cloudinary.js";
+import { emailService } from "../email/email.service.js";
 
 interface UserProfileUpdateData {
   name?: string;
   username?: string;
+  email?: string;
   bio?: string;
   title?: string;
   location?: string;
@@ -21,6 +24,7 @@ export class UserService {
   public async findUserByEmail(email: string): Promise<User | null> {
     return prisma.user.findUnique({ where: { email } });
   }
+
   public async findUserByUsername(username: string, currentUserId?: string) {
     const user = await prisma.user.findUnique({
       where: { username },
@@ -47,8 +51,8 @@ export class UserService {
         data: {
           email,
           username,
-          hashedPassword: hashedPassword, // Using correct schema field name
-          name: name, // Using correct schema field name
+          hashedPassword: hashedPassword,
+          name: name,
         },
       });
       logger.info(
@@ -79,20 +83,15 @@ export class UserService {
   public async deleteUserAccount(userId: string): Promise<void> {
     logger.info({ userId }, "Initiating account deletion process.");
 
-    // --- 2. ENHANCED LOGIC: Find user first to get asset URLs ---
     const user = await this.findUserById(userId);
     if (!user) {
       logger.warn({ userId }, "Account deletion skipped: User not found.");
-      // No need to throw an error, the desired state (user gone) is already achieved.
       return;
     }
 
-    // --- 3. DELETE CLOUDINARY ASSETS ---
-    // We create an array of deletion promises to run them in parallel.
     const deletionPromises: Promise<any>[] = [];
 
     if (user.profileImage) {
-      // The public_id is the unique part of the URL, which we constructed.
       const publicId = `user_assets/profile_${userId}`;
       deletionPromises.push(deleteFromCloudinary(publicId));
     }
@@ -101,8 +100,6 @@ export class UserService {
       deletionPromises.push(deleteFromCloudinary(publicId));
     }
 
-    // Run all deletion tasks. We use Promise.allSettled to ensure that even
-    // if one asset deletion fails, we still proceed to delete the user record.
     if (deletionPromises.length > 0) {
       logger.info(
         { userId },
@@ -111,12 +108,10 @@ export class UserService {
       await Promise.allSettled(deletionPromises);
     }
 
-    // --- 4. DELETE USER FROM DATABASE ---
     try {
       await prisma.user.delete({ where: { id: userId } });
       logger.info({ userId }, "User record and assets deleted successfully.");
     } catch (error) {
-      // This catch is a fallback, but the initial check should prevent P2025.
       logger.error(
         { err: error, userId },
         "Error deleting user record from database"
@@ -129,29 +124,50 @@ export class UserService {
     userId: string,
     data: UserProfileUpdateData
   ): Promise<User> {
-    // --- FIX: First, check if the user actually exists ---
     const existingUser = await this.findUserById(userId);
     if (!existingUser) {
       throw createHttpError(404, "User profile not found.");
     }
 
+    const updatePayload: Prisma.UserUpdateInput = { ...data };
+
+    // If the user is trying to change their email...
+    if (data.email && data.email !== existingUser.email) {
+      // Mark the new email as unverified
+      updatePayload.emailVerified = false;
+    }
+
     try {
-      const user = await prisma.user.update({
+      const updatedUser = await prisma.user.update({
         where: { id: userId },
-        data: data, // Prisma handles ignoring undefined fields
+        data: updatePayload,
       });
+
+      // FEATURE: If email was changed, send notifications
+      if (data.email && data.email !== existingUser.email) {
+        // 1. Send a notification to the OLD email address
+        await emailService.sendEmailChangeNotificationEmail(
+          existingUser.email,
+          updatedUser.email,
+          updatedUser.name
+        );
+        // 2. Send a new verification email to the NEW address
+        await emailService.sendWelcomeVerificationEmail(updatedUser);
+      }
+
       logger.info({ userId }, "User profile updated successfully.");
-      return user;
+      return updatedUser;
     } catch (e) {
       if (
         e instanceof Prisma.PrismaClientKnownRequestError &&
         e.code === "P2002"
       ) {
+        const field = (e.meta?.target as string[])?.[0] || "field";
         logger.warn(
-          { userId, username: data.username },
-          "Username conflict during profile update."
+          { userId, field, value: (data as any)[field] },
+          "Unique constraint violation during profile update."
         );
-        throw createHttpError(409, "This username is already taken.");
+        throw createHttpError(409, `This ${field} is already taken.`);
       }
       logger.error({ err: e, userId }, "Error updating user profile");
       throw createHttpError(500, "Could not update user profile.");

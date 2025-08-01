@@ -1,4 +1,4 @@
-// src/features/auth/auth.service.ts
+// FILE: server/src/features/auth/auth.service.ts (FULL & COMPLETE)
 
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
@@ -20,6 +20,7 @@ import {
   ChangePasswordInputDto,
 } from "../../types/auth.types.js";
 import { userService } from "../user/user.service.js";
+import { emailService } from "../email/email.service.js";
 
 // Helper to remove password hash before returning user object
 const sanitizeUser = (user: User): Omit<User, "hashedPassword"> => {
@@ -51,6 +52,10 @@ export class AuthService {
     }
 
     const user = await userService.createUser(input);
+
+    // FEATURE: Send welcome & email verification email upon registration
+    await emailService.sendWelcomeVerificationEmail(user);
+
     const accessToken = generateAccessToken(user);
     const { token: refreshToken, expiresAt } =
       await generateAndStoreRefreshToken(user.id);
@@ -134,6 +139,9 @@ export class AuthService {
       "User password changed successfully. Revoking all sessions."
     );
     await this.revokeAllRefreshTokensForUser(userId);
+
+    // FEATURE: Send a confirmation email that the password was changed
+    await emailService.sendPasswordChangeConfirmationEmail(user);
   }
 
   public async handleRefreshTokenRotation(
@@ -209,7 +217,6 @@ export class AuthService {
         { email: profile.email },
         "Creating new user from OAuth profile."
       );
-      // **IMPROVED**: Generate a more unique username to avoid collisions.
       const baseUsername = profile.email
         .split("@")[0]
         .replace(/[^a-zA-Z0-9]/g, "");
@@ -221,6 +228,7 @@ export class AuthService {
           email: profile.email,
           name: profile.name ?? "New User",
           username: username,
+          emailVerified: true, // Social logins have verified emails by default
           ...(profile.image && { profileImage: profile.image }),
         },
       });

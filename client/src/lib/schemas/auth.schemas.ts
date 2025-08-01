@@ -1,4 +1,3 @@
-// src/lib/schemas/auth.schemas.ts
 import { z } from "zod";
 
 export const loginSchema = z.object({
@@ -54,8 +53,8 @@ export const changePasswordSchema = z
     path: ["newPassword"],
   });
 
-// --- FIX: Added the missing updateProfileSchema ---
 export const updateProfileSchema = z.object({
+  email: z.string().email("Please enter a valid email address.").optional(),
   name: z.string().min(1, "Name cannot be empty.").max(50, "Name is too long."),
   username: z
     .string()
@@ -88,8 +87,27 @@ export const updateProfileSchema = z.object({
     .nullable(),
 });
 
+// --- ADDED: Schemas for the forgot/reset password forms ---
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("Please enter a valid email address."),
+});
+
+export const resetPasswordSchema = z
+  .object({
+    newPassword: z
+      .string()
+      .min(8, "Password must be at least 8 characters long."),
+    confirmPassword: z.string(),
+  })
+  .refine((data) => data.newPassword === data.confirmPassword, {
+    message: "Passwords do not match.",
+    path: ["confirmPassword"],
+  });
+
 // --- Export all the form value types ---
 export type LoginFormValues = z.infer<typeof loginSchema>;
 export type SignUpFormValues = z.infer<typeof signUpSchema>;
 export type ChangePasswordFormValues = z.infer<typeof changePasswordSchema>;
-export type UpdateProfileFormValues = z.infer<typeof updateProfileSchema>; // Export the new type
+export type UpdateProfileFormValues = z.infer<typeof updateProfileSchema>;
+export type ForgotPasswordFormValues = z.infer<typeof forgotPasswordSchema>;
+export type ResetPasswordFormValues = z.infer<typeof resetPasswordSchema>;

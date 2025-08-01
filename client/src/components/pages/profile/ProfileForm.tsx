@@ -1,12 +1,12 @@
-//src/components/pages/profile/ProfileForm.tsx
+// FILE: src/components/pages/profile/ProfileForm.tsx (Updated)
+
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef } from "react";
 import Image from "next/image";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useSession } from "next-auth/react";
-
 import { useAppSelector, useAppDispatch } from "@/lib/hooks/hooks";
 import { useUpdateMyProfileMutation } from "@/lib/features/user/userApiSlice";
 import { resetUploadState } from "@/lib/features/upload/uploadProgressSlice";
@@ -16,12 +16,9 @@ import {
 } from "@/lib/schemas/auth.schemas";
 import { SanitizedUserDto } from "@/lib/features/user/userTypes";
 import { dataURLtoFile } from "@/components/shared/dataURLtoFile";
-
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-
 import { Label } from "@/components/ui/label";
-
 import { Textarea } from "@/components/ui/textarea";
 import {
   Card,
@@ -43,7 +40,6 @@ import {
 import { Progress } from "@/components/ui/progress";
 import {
   Camera,
-  Edit,
   Loader2,
   Save,
   X,
@@ -53,6 +49,7 @@ import {
 } from "lucide-react";
 import ImageCropper from "@/components/shared/ImageCropper";
 import { cn } from "@/lib/utils";
+import { getApiErrorMessage } from "@/lib/utils";
 
 interface ProfileFormProps {
   user: SanitizedUserDto;
@@ -101,12 +98,13 @@ export default function ProfileForm({
     register,
     handleSubmit,
     formState: { errors, isDirty },
-    reset,
   } = useForm<UpdateProfileFormValues>({
     resolver: zodResolver(updateProfileSchema),
     defaultValues: {
       name: user.name || "",
       username: user.username || "",
+      // --- ADDED: Email field in default values ---
+      email: user.email || "",
       bio: user.bio || "",
       title: user.title || "",
       location: user.location || "",
@@ -162,10 +160,11 @@ export default function ProfileForm({
           user: { image: response.data.user.profileImage },
         });
       }
+      setUiMessage({ type: "success", text: "Image updated successfully!" });
     } catch (err: any) {
       setUiMessage({
         type: "error",
-        text: err?.data?.message || "Image upload failed.",
+        text: getApiErrorMessage(err),
       });
     }
   };
@@ -180,8 +179,10 @@ export default function ProfileForm({
     const formData = new FormData();
     (Object.keys(data) as Array<keyof UpdateProfileFormValues>).forEach(
       (key) => {
-        if (data[key] !== (user as any)[key]) {
-          formData.append(key, data[key] || "");
+        const userValue = (user as any)[key] || "";
+        const formValue = data[key] || "";
+        if (formValue !== userValue) {
+          formData.append(key, formValue);
         }
       }
     );
@@ -193,17 +194,28 @@ export default function ProfileForm({
 
     try {
       const response = await updateProfile(formData).unwrap();
-      setUiMessage({ type: "success", text: response.message });
-      if (response.data?.user?.name) {
+
+      // --- UPDATED: Logic to show a specific message on email change ---
+      let successMessage = response.message;
+      if (data.email && data.email !== user.email) {
+        successMessage =
+          "Profile updated! A verification link has been sent to your new email address.";
+      }
+      setUiMessage({ type: "success", text: successMessage });
+
+      if (response.data?.user) {
         await updateNextAuthSession({
-          user: { name: response.data.user.name },
+          user: {
+            name: response.data.user.name,
+            email: response.data.user.email,
+          },
         });
       }
-      setTimeout(() => onFinishedEditing(), 1500);
+      setTimeout(() => onFinishedEditing(), 2000);
     } catch (err: any) {
       setUiMessage({
         type: "error",
-        text: err?.data?.message || "Failed to update profile.",
+        text: getApiErrorMessage(err),
       });
     }
   };
@@ -221,7 +233,6 @@ export default function ProfileForm({
           </CardHeader>
 
           <CardContent className="p-0">
-            {/* --- FIX: Replaced fixed height with aspect-video for responsive banner --- */}
             <div className="relative aspect-video w-full bg-muted group">
               <div className="absolute inset-0 bg-black/50 z-10 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button
@@ -347,6 +358,23 @@ export default function ProfileForm({
                   )}
                 </div>
               </div>
+
+              {/* --- ADDED: Email input field --- */}
+              <div>
+                <Label htmlFor="email">Email Address</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  {...register("email")}
+                  disabled={isUpdating}
+                />
+                {errors.email && (
+                  <p className="text-destructive text-xs mt-1">
+                    {errors.email.message}
+                  </p>
+                )}
+              </div>
+
               <div>
                 <Label htmlFor="title">Title / Headline</Label>
                 <Input

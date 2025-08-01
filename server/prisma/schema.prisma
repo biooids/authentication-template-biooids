@@ -16,7 +16,6 @@ model User {
   name                String
   username            String    @unique
   email               String    @unique
-  // --- ADDED: Field to track if the user's email is verified ---
   emailVerified       Boolean   @default(false)
   hashedPassword      String?
   bio                 String?
@@ -36,13 +35,11 @@ model User {
   refreshTokens       RefreshToken[]
   settings            UserSettings?
   passwordResetTokens PasswordResetToken[]
-  // --- ADDED: Relation for email verification tokens ---
   emailVerificationTokens EmailVerificationToken[]
 
   @@map("users")
 }
 
-// --- ADDED: New model for password reset tokens ---
 model PasswordResetToken {
   id        String   @id @default(uuid())
   token     String   @unique
@@ -55,7 +52,6 @@ model PasswordResetToken {
   @@map("password_reset_tokens")
 }
 
-// --- ADDED: New model for email verification tokens ---
 model EmailVerificationToken {
   id        String   @id @default(uuid())
   token     String   @unique

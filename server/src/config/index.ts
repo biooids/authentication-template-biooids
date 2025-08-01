@@ -1,4 +1,4 @@
-//src/config/index.ts
+// FILE: server/src/config/index.ts (Updated)
 
 /**
  * Helper to get and validate environment variables.
@@ -7,8 +7,6 @@
 const getEnvVariable = (key: string, required: boolean = true): string => {
   const value = process.env[key];
   if (!value && required) {
-    // Throw an error instead of logging and exiting.
-    // This allows the global uncaughtException handler to catch and log it properly.
     throw new Error(
       `❌ Fatal Error: Missing required environment variable ${key}. Check your .env file or platform settings.`
     );
@@ -36,7 +34,6 @@ const getEnvVariableAsInt = (
     if (defaultValue !== undefined) {
       return defaultValue;
     }
-    // This case should ideally not be hit if logic is correct
     return NaN;
   }
 
@@ -71,11 +68,14 @@ interface Config {
     refreshTokenName: string;
   };
   logLevel: string;
+  // --- ADDED: Mailgun and Frontend URL config ---
+  mailgun: {
+    apiKey: string;
+    domain: string;
+  };
+  frontendUrl: string;
 }
 
-// Build the config object
-// The try/catch block ensures that if config validation fails,
-// it's logged before the process exits.
 let config: Config;
 
 try {
@@ -108,13 +108,18 @@ try {
     },
 
     cookies: {
-      refreshTokenName: "jid", // Often good to keep constants like this here too
+      refreshTokenName: "jid",
     },
     logLevel: getEnvVariable("LOG_LEVEL", false) || "info",
+
+    // --- ADDED: Load new variables from .env ---
+    mailgun: {
+      apiKey: getEnvVariable("MAILGUN_API_KEY", true),
+      domain: getEnvVariable("MAILGUN_DOMAIN", true),
+    },
+    frontendUrl: getEnvVariable("FRONTEND_URL", true),
   };
 } catch (error) {
-  // At this early stage, the logger is not initialized.
-  // A direct console.error is the most reliable way to show a fatal config error.
   console.error(
     "❌ Critical error during application configuration setup:",
     error

@@ -11,6 +11,7 @@ import AuthInitializer from "@/components/layouts/AuthInitializer";
 import { AuthModal } from "@/components/layouts/AuthModal";
 import { Toaster } from "react-hot-toast";
 import AuthErrorHandler from "@/components/layouts/AuthErrorHandler";
+import UnverifiedEmailBanner from "@/components/shared/UnverifiedEmailBanner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,6 +46,8 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
+              <UnverifiedEmailBanner />
+
               <AuthErrorHandler />
 
               <Toaster position="top-center" />

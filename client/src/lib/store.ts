@@ -1,8 +1,3 @@
-//src/lib/store.ts
-
-// =================================================================
-// FILE: src/lib/store.ts (Corrected Version)
-// =================================================================
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 
@@ -10,30 +5,32 @@ import { setupListeners } from "@reduxjs/toolkit/query";
 import authReducer from "./features/auth/authSlice";
 import userReducer from "./features/user/userSlice";
 import uploadProgressReducer from "./features/upload/uploadProgressSlice";
-import { authApiSlice } from "./features/auth/authApiSlice";
 import uiReducer from "./features/ui/uiSlice";
+
+// API Slices
+import { authApiSlice } from "./features/auth/authApiSlice";
 import { userApiSlice } from "./features/user/userApiSlice";
 import { adminApiSlice } from "./features/admin/adminApiSlice";
+import { emailApiSlice } from "./features/email/emailApiSlice";
 
 export const store = configureStore({
   reducer: {
-    // Standard Reducers
     auth: authReducer,
     user: userReducer,
     uploadProgress: uploadProgressReducer,
     ui: uiReducer,
 
-    // RTK Query Reducers
     [userApiSlice.reducerPath]: userApiSlice.reducer,
     [authApiSlice.reducerPath]: authApiSlice.reducer,
     [adminApiSlice.reducerPath]: adminApiSlice.reducer,
+    [emailApiSlice.reducerPath]: emailApiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) =>
-    // Chain all middleware correctly using .concat()
     getDefaultMiddleware()
       .concat(userApiSlice.middleware)
       .concat(authApiSlice.middleware)
-      .concat(adminApiSlice.middleware),
+      .concat(adminApiSlice.middleware)
+      .concat(emailApiSlice.middleware),
 });
 
 setupListeners(store.dispatch);

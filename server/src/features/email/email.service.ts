@@ -1,0 +1,189 @@
+//src/features/email/email.service.ts
+
+import crypto from "crypto";
+import bcrypt from "bcryptjs";
+import formData from "form-data";
+import Mailgun from "mailgun.js";
+import { User } from "@/prisma-client";
+import { config } from "../../config/index.js";
+import { logger } from "../../config/logger.js";
+import prisma from "../../db/prisma.js";
+import { createHttpError } from "../../utils/error.factory.js";
+import { userService } from "../user/user.service.js";
+import { ResetPasswordInputDto } from "./email.types.js";
+
+const mailgun = new Mailgun(formData);
+const mg = mailgun.client({
+  username: "api",
+  key: config.mailgun.apiKey,
+});
+
+class EmailService {
+  // ===============================================
+  // ===           WELCOME & VERIFICATION        ===
+  // ===============================================
+
+  public async sendWelcomeVerificationEmail(user: User): Promise<void> {
+    const verificationToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(verificationToken)
+      .digest("hex");
+    const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000); // 24 hours
+
+    await prisma.emailVerificationToken.create({
+      data: { userId: user.id, token: hashedToken, expiresAt },
+    });
+
+    const verificationUrl = `${config.frontendUrl}/verify-email?token=${verificationToken}`;
+    const messageData = {
+      from: `Your App Name <welcome@${config.mailgun.domain}>`,
+      to: user.email,
+      subject: "Welcome! Please Verify Your Email Address",
+      html: `<h1>Welcome to Our Platform, ${user.name}!</h1><p>We're excited to have you. Please click the link below to verify your email address:</p><a href="${verificationUrl}" target="_blank">Verify Your Email</a><p>This link will expire in 24 hours.</p>`,
+    };
+
+    try {
+      await mg.messages.create(config.mailgun.domain, messageData);
+      logger.info({ userId: user.id }, "Welcome verification email sent.");
+    } catch (error) {
+      logger.error({ err: error }, "Failed to send welcome email.");
+    }
+  }
+
+  public async verifyEmail(token: string): Promise<void> {
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const storedToken = await prisma.emailVerificationToken.findUnique({
+      where: { token: hashedToken },
+    });
+
+    if (!storedToken) {
+      throw createHttpError(400, "Invalid or expired verification token.");
+    }
+    if (new Date() > storedToken.expiresAt) {
+      await prisma.emailVerificationToken.delete({
+        where: { id: storedToken.id },
+      });
+      throw createHttpError(400, "Verification token has expired.");
+    }
+
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: storedToken.userId },
+        data: { emailVerified: true },
+      }),
+      prisma.emailVerificationToken.delete({ where: { id: storedToken.id } }),
+    ]);
+
+    logger.info({ userId: storedToken.userId }, "Email verified successfully.");
+  }
+
+  // ===============================================
+  // ===           PASSWORD MANAGEMENT           ===
+  // ===============================================
+
+  public async sendPasswordResetEmail(email: string): Promise<void> {
+    const user = await userService.findUserByEmail(email);
+    if (!user) {
+      logger.warn({ email }, "Password reset requested for non-existent user.");
+      return;
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto
+      .createHash("sha256")
+      .update(resetToken)
+      .digest("hex");
+    const expiresAt = new Date(Date.now() + 15 * 60 * 1000); // 15 minutes
+
+    await prisma.passwordResetToken.create({
+      data: { userId: user.id, token: hashedToken, expiresAt },
+    });
+
+    const resetUrl = `${config.frontendUrl}/reset-password?token=${resetToken}`;
+    const messageData = {
+      from: `Your App Name <noreply@${config.mailgun.domain}>`,
+      to: user.email,
+      subject: "Your Password Reset Request",
+      html: `<h1>Password Reset Request</h1><p>Hi ${user.name},</p><p>Click the link below to reset your password:</p><a href="${resetUrl}" target="_blank">Reset Your Password</a><p>This link expires in 15 minutes.</p><p>If you did not request this, please ignore this email.</p>`,
+    };
+
+    try {
+      await mg.messages.create(config.mailgun.domain, messageData);
+      logger.info({ userId: user.id }, "Password reset email sent.");
+    } catch (error) {
+      logger.error({ err: error }, "Failed to send password reset email.");
+    }
+  }
+
+  public async resetPassword(input: ResetPasswordInputDto): Promise<void> {
+    const { token, newPassword } = input;
+    const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+    const storedToken = await prisma.passwordResetToken.findUnique({
+      where: { token: hashedToken },
+    });
+
+    if (!storedToken) {
+      throw createHttpError(400, "Invalid or expired password reset token.");
+    }
+    if (new Date() > storedToken.expiresAt) {
+      await prisma.passwordResetToken.delete({ where: { id: storedToken.id } });
+      throw createHttpError(400, "Password reset token has expired.");
+    }
+
+    const newHashedPassword = await bcrypt.hash(newPassword, 10);
+    await prisma.$transaction([
+      prisma.user.update({
+        where: { id: storedToken.userId },
+        data: { hashedPassword: newHashedPassword },
+      }),
+      prisma.passwordResetToken.delete({ where: { id: storedToken.id } }),
+    ]);
+
+    logger.info({ userId: storedToken.userId }, "Password reset successful.");
+  }
+
+  // ===============================================
+  // ===           SECURITY NOTIFICATIONS        ===
+  // ===============================================
+
+  public async sendPasswordChangeConfirmationEmail(user: User): Promise<void> {
+    const messageData = {
+      from: `Your App Name <security@${config.mailgun.domain}>`,
+      to: user.email,
+      subject: "Your Password Has Been Changed",
+      html: `<h1>Password Changed Successfully</h1><p>Hi ${user.name},</p><p>This is a confirmation that the password for your account was just changed.</p><p>If you did not make this change, please reset your password immediately and contact support.</p>`,
+    };
+    try {
+      await mg.messages.create(config.mailgun.domain, messageData);
+      logger.info({ userId: user.id }, "Password change confirmation sent.");
+    } catch (error) {
+      logger.error(
+        { err: error },
+        "Failed to send password change confirmation."
+      );
+    }
+  }
+
+  public async sendEmailChangeNotificationEmail(
+    oldEmail: string,
+    newEmail: string,
+
+    name: string
+  ): Promise<void> {
+    const messageData = {
+      from: `Your App Name <security@${config.mailgun.domain}>`,
+      to: oldEmail,
+      subject: "Your Email Address Has Been Changed",
+      html: `<h1>Email Address Changed</h1><p>Hi ${name},</p><p>The email for your account has been changed to ${newEmail}.</p><p>If you did not authorize this, please contact our support team immediately.</p>`,
+    };
+    try {
+      await mg.messages.create(config.mailgun.domain, messageData);
+      logger.info({ oldEmail, newEmail }, "Email change notification sent.");
+    } catch (error) {
+      logger.error({ err: error }, "Failed to send email change notification.");
+    }
+  }
+}
+
+export const emailService = new EmailService();
