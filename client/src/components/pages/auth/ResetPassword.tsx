@@ -1,9 +1,8 @@
-// FILE: src/components/pages/auth/ResetPassword.tsx
+// FILE: src/components/pages/auth/ResetPassword.tsx (NEW FILE)
 
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import Link from "next/link";
 import { useSearchParams, useRouter } from "next/navigation";
 import { useForm, SubmitHandler } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
