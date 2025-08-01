@@ -1,3 +1,5 @@
+//src/features/email/email.routes.ts
+
 import { Router } from "express";
 import { emailController } from "./email.controller.js";
 import { validate } from "../../middleware/validate.js";

@@ -1,15 +1,15 @@
-// src/routes/apiRoutes.ts
+// FILE: src/routes/apiRoutes.ts (Corrected)
 
 import { Router } from "express";
 import authRoutes from "../features/auth/auth.routes.js";
 import userRoutes from "../features/user/user.routes.js";
 import adminRoutes from "../features/admin/admin.routes.js";
+import emailRoutes from "../features/email/email.routes.js";
 import { authenticate } from "../middleware/authenticate.js";
 
 const router: Router = Router();
 
-// **IMPROVED**: Run the flexible authenticate middleware on all routes.
-// It will attach `req.user` if a valid token is present, or `null` otherwise.
+// This middleware runs on all API routes
 router.use(authenticate());
 
 router.get("/health", (_req, res) => {
@@ -19,7 +19,8 @@ router.get("/health", (_req, res) => {
 });
 
 router.use("/auth", authRoutes);
-router.use("/users", userRoutes); // Note: Renamed to /users for RESTful convention
+router.use("/users", userRoutes);
 router.use("/admin", adminRoutes);
+router.use("/email", emailRoutes);
 
 export default router;
