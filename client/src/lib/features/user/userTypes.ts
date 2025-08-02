@@ -23,6 +23,7 @@ export type SanitizedUserDto = {
   twitterUrl: string | null;
   githubUrl: string | null;
   websiteUrl: string | null;
+  emailVerified: boolean;
 };
 
 // This type now accurately reflects what the backend provides for a user profile.

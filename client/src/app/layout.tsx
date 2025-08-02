@@ -46,13 +46,14 @@ export default function RootLayout({
               enableSystem
               disableTransitionOnChange
             >
-              <UnverifiedEmailBanner />
-
               <AuthErrorHandler />
 
               <Toaster position="top-center" />
               <NextAuthSync />
-              <AuthInitializer>{children}</AuthInitializer>
+              <AuthInitializer>
+                <UnverifiedEmailBanner />
+                {children}
+              </AuthInitializer>
               <AuthModal />
             </ThemeProvider>
           </SessionProviderWrapper>

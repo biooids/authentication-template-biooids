@@ -37,10 +37,14 @@ export const emailApiSlice = createApi({
 
       invalidatesTags: ["Me"],
     }),
-    resendVerificationEmail: builder.mutation<{ message: string }, void>({
-      query: () => ({
+    resendVerificationEmail: builder.mutation<
+      { message: string },
+      { callbackUrl: string }
+    >({
+      query: (body) => ({
         url: "/email/resend-verification",
         method: "POST",
+        body,
       }),
     }),
   }),
