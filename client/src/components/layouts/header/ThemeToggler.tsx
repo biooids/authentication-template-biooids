@@ -1,9 +1,10 @@
+// FILE: src/components/layouts/header/ThemeToggler.tsx
+
 "use client";
 
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -11,9 +12,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useUpdateSettingsMutation } from "@/lib/features/settings/settingsApiSlice";
+import { ThemePreference } from "@/lib/features/settings/settingsTypes";
+import toast from "react-hot-toast";
 
-function ThemeToggler() {
+export default function ThemeToggler() {
   const { setTheme } = useTheme();
+  const [updateSettings] = useUpdateSettingsMutation();
+
+  const handleThemeChange = async (newTheme: "light" | "dark" | "system") => {
+    try {
+      // 1. Instantly update the UI for a snappy user experience
+      setTheme(newTheme);
+      // 2. Save the preference to the backend in the background
+      await updateSettings({
+        theme: newTheme.toUpperCase() as ThemePreference,
+      }).unwrap();
+    } catch (error) {
+      toast.error("Could not save theme preference.");
+    }
+  };
 
   return (
     <DropdownMenu>
@@ -25,17 +43,16 @@ function ThemeToggler() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("light")}>
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("dark")}>
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem onClick={() => handleThemeChange("system")}>
           System
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   );
 }
-export default ThemeToggler;

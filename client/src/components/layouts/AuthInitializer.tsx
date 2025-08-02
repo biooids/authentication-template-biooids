@@ -1,30 +1,33 @@
-//src/components/layouts/AuthInitializer.tsx
+// FILE: src/components/layouts/AuthInitializer.tsx
+
 "use client";
 
 import { useSession } from "next-auth/react";
 import { useGetMeQuery } from "@/lib/features/user/userApiSlice";
+import { useGetSettingsQuery } from "@/lib/features/settings/settingsApiSlice"; // 1. Import settings query
 import { Loader2 } from "lucide-react";
+import ThemeSync from "./ThemeSync"; // 2. Import the new ThemeSync component
 
-/**
- * This component handles the initial authentication state of the application.
- * It ensures that the user's profile data is fetched and loaded into the Redux store
- * as soon as a valid session is detected.
- */
 export default function AuthInitializer({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const { data: session, status } = useSession();
+  const { status } = useSession();
+  const isAuthenticated = status === "authenticated";
 
-  // Conditionally call the getMe query ONLY when there is an active session.
-  const { isLoading } = useGetMeQuery(undefined, {
-    skip: status !== "authenticated",
+  // Trigger the user query when authenticated
+  const { isLoading: isUserLoading } = useGetMeQuery(undefined, {
+    skip: !isAuthenticated,
   });
 
-  // While next-auth is checking the session or we are fetching the user,
-  // show a global loading indicator.
-  if (status === "loading" || isLoading) {
+  // Trigger the settings query when authenticated
+  const { isLoading: areSettingsLoading } = useGetSettingsQuery(undefined, {
+    skip: !isAuthenticated,
+  });
+
+  // Show a loading screen while the session is being checked or initial data is being fetched.
+  if (status === "loading" || isUserLoading || areSettingsLoading) {
     return (
       <div className="flex items-center justify-center h-screen w-full">
         <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -32,7 +35,12 @@ export default function AuthInitializer({
     );
   }
 
-  // Once the session check is complete and any necessary user fetching is done,
-  // render the rest of the application.
-  return <>{children}</>;
+  return (
+    <>
+      {/* 3. Add the ThemeSync component here */}
+      {/* It will run only after the loading is complete and settings are available */}
+      <ThemeSync />
+      {children}
+    </>
+  );
 }
