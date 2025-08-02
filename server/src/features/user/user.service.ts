@@ -89,6 +89,11 @@ export class UserService {
       return;
     }
 
+    // --- MODIFICATION START ---
+    // Store user details before they are deleted from the database.
+    const userEmail = user.email;
+    const userName = user.name;
+
     const deletionPromises: Promise<any>[] = [];
 
     if (user.profileImage) {
@@ -101,16 +106,17 @@ export class UserService {
     }
 
     if (deletionPromises.length > 0) {
-      logger.info(
-        { userId },
-        `Deleting ${deletionPromises.length} assets from Cloudinary.`
-      );
       await Promise.allSettled(deletionPromises);
     }
 
     try {
       await prisma.user.delete({ where: { id: userId } });
-      logger.info({ userId }, "User record and assets deleted successfully.");
+      logger.info({ userId }, "User record deleted successfully.");
+
+      await emailService.sendAccountDeletionConfirmationEmail(
+        userEmail,
+        userName
+      );
     } catch (error) {
       logger.error(
         { err: error, userId },

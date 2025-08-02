@@ -225,6 +225,41 @@ class EmailService {
       logger.error({ err: error }, "Failed to send email change notification.");
     }
   }
+  // ===============================================
+  // ===           ACCOUNT NOTIFICATIONS         ===
+  // ===============================================
+
+  /**
+   * Sends a final confirmation email after an account has been deleted.
+   * @param email - The email address of the deleted user.
+   * @param name - The name of the deleted user.
+   */
+  public async sendAccountDeletionConfirmationEmail(
+    email: string,
+    name: string
+  ): Promise<void> {
+    const messageData = {
+      from: `Your App Name <noreply@${config.mailgun.domain}>`,
+      to: email,
+      subject: "Your Account Has Been Deleted",
+      html: `
+        <h1>Account Deletion Confirmation</h1>
+        <p>Hi ${name},</p>
+        <p>This is a confirmation that your account associated with this email address has been permanently deleted from our platform.</p>
+        <p>Thank you for your time with us. If you did not request this action or believe this was a mistake, please contact our support team immediately.</p>
+      `,
+    };
+
+    try {
+      await mg.messages.create(config.mailgun.domain, messageData);
+      logger.info({ email }, "Account deletion confirmation email sent.");
+    } catch (error) {
+      logger.error(
+        { err: error },
+        "Failed to send account deletion confirmation email."
+      );
+    }
+  }
 }
 
 export const emailService = new EmailService();
