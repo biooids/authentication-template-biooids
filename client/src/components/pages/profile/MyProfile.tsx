@@ -1,4 +1,5 @@
-//src/components/pages/profile/MyProfile.tsx
+// FILE: src/components/pages/profile/MyProfile.tsx
+
 "use client";
 
 import React, { useState } from "react";
@@ -26,17 +27,14 @@ export default function MyProfilePage() {
   return (
     <div className="container mx-auto max-w-4xl py-8 space-y-12">
       {isEditing ? (
-        // If editing, render the form component and pass a function to cancel editing
         <ProfileForm
           user={currentUser}
           onFinishedEditing={() => setIsEditing(false)}
         />
       ) : (
-        // Otherwise, render the display component and pass a function to start editing
         <ProfileHeader user={currentUser} onEdit={() => setIsEditing(true)} />
       )}
-
-      {/* These components are part of the page regardless of edit state */}
+      {/* These components are always visible below the header/form */}
       <ChangePasswordForm />
       <DangerZone />
     </div>

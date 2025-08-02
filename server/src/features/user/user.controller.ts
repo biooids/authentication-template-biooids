@@ -18,21 +18,23 @@ const sanitizeUserForResponse = (user: User): Omit<User, "hashedPassword"> => {
 
 class UserController {
   getMe = asyncHandler(async (req: Request, res: Response) => {
-    // **OPTIMIZED**: We directly use the `req.user` object.
-    // The `authenticate` middleware has already fetched this fresh, sanitized user data.
-    const user = req.user;
+    const userId = req.user?.id;
 
-    if (!user) {
-      // This is a safeguard; `authenticate({ required: true })` should prevent this.
+    if (!userId) {
       throw createHttpError(401, "Authenticated user not found.");
+    }
+
+    const fullUser = await userService.findUserById(userId);
+
+    if (!fullUser) {
+      throw createHttpError(404, "User data could not be found.");
     }
 
     res.status(200).json({
       status: "success",
-      data: { user },
+      data: { user: sanitizeUserForResponse(fullUser) },
     });
   });
-
   getUserByUsername = asyncHandler(async (req: Request, res: Response) => {
     const { username } = req.params;
     const currentUserId = req.user?.id; // The user making the request (or null if guest)

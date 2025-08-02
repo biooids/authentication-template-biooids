@@ -47,7 +47,7 @@ class EmailService {
 
     const verificationUrl = `${config.frontendUrl}/auth/verify-email?token=${verificationToken}`;
     const messageData = {
-      from: `biooids Name <welcome@${config.mailgun.domain}>`,
+      from: `biooids  <welcome@${config.mailgun.domain}>`,
       to: user.email,
       subject: "Welcome! Please Verify Your Email Address",
       html: `<h1>Welcome to Our Platform, ${user.name}!</h1><p>Please click the link below to verify your email address:</p><a href="${verificationUrl}" target="_blank">Verify Your Email</a><p>This link will expire in 24 hours.</p>`,
@@ -137,7 +137,7 @@ class EmailService {
 
     const resetUrl = `${config.frontendUrl}/auth/reset-password?token=${resetToken}`;
     const messageData = {
-      from: `biooids Name <noreply@${config.mailgun.domain}>`,
+      from: `biooids  <noreply@${config.mailgun.domain}>`,
       to: user.email,
       subject: "Your Password Reset Request",
       html: `<h1>Password Reset Request</h1><p>Hi ${user.name},</p><p>Click the link below to reset your password:</p><a href="${resetUrl}" target="_blank">Reset Your Password</a><p>This link expires in 15 minutes.</p><p>If you did not request this, please ignore this email.</p>`,
@@ -191,7 +191,7 @@ class EmailService {
 
   public async sendPasswordChangeConfirmationEmail(user: User): Promise<void> {
     const messageData = {
-      from: `biooids Name <security@${config.mailgun.domain}>`,
+      from: `biooids  <security@${config.mailgun.domain}>`,
       to: user.email,
       subject: "Your Password Has Been Changed",
       html: `<h1>Password Changed Successfully</h1><p>Hi ${user.name},</p><p>This is a confirmation that the password for your account was just changed.</p><p>If you did not make this change, please reset your password immediately and contact support.</p>`,
@@ -213,7 +213,7 @@ class EmailService {
     name: string
   ): Promise<void> {
     const messageData = {
-      from: `biooids Name <security@${config.mailgun.domain}>`,
+      from: `biooids  <security@${config.mailgun.domain}>`,
       to: oldEmail,
       subject: "Your Email Address Has Been Changed",
       html: `<h1>Email Address Changed</h1><p>Hi ${name},</p><p>The email for your account has been changed to ${newEmail}.</p><p>If you did not authorize this, please contact our support team immediately.</p>`,
@@ -239,7 +239,7 @@ class EmailService {
     name: string
   ): Promise<void> {
     const messageData = {
-      from: `Your App Name <noreply@${config.mailgun.domain}>`,
+      from: `biooids <noreply@${config.mailgun.domain}>`,
       to: email,
       subject: "Your Account Has Been Deleted",
       html: `

@@ -1,3 +1,5 @@
+//src/lib/store.ts
+
 import { configureStore } from "@reduxjs/toolkit";
 import { setupListeners } from "@reduxjs/toolkit/query";
 

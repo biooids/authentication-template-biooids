@@ -21,8 +21,6 @@ interface RefreshedTokenResponse {
   data: { accessToken: string; refreshToken: string };
 }
 
-// --- Helper Functions ---
-
 /**
  * Decodes a JWT to get its expiry timestamp.
  * @returns Expiry timestamp in milliseconds, or 0 if invalid.
