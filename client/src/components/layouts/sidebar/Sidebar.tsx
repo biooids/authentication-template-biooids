@@ -18,7 +18,7 @@ export default function Sidebar() {
 
   return (
     // Use flex-col to structure the sidebar vertically
-    <aside className="hidden w-64 flex-col border-r bg-background md:flex">
+    <aside className="hidden w-64 flex-col border-r bg-background md:flex h-full">
       {/* 1. Header / Logo */}
       <div className="flex h-14 shrink-0 items-center border-b px-4 lg:h-[60px] lg:px-6">
         <Link href="/" className="flex items-center gap-2 font-semibold">
