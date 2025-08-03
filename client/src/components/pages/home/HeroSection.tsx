@@ -1,3 +1,5 @@
+// FILE: src/components/pages/home/HeroSection.tsx
+
 "use client";
 
 import Link from "next/link";
@@ -14,6 +16,7 @@ import {
   Heart,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import TechStackShowcase from "./TechStackShowcase"; // 1. Import the new component
 
 // A reusable card component for the feature grid
 const FeatureCard = ({
@@ -47,15 +50,17 @@ export default function HeroSection() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           <div className="text-center lg:text-left">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tighter">
-              Launch Your Next App on a{" "}
+              Complex full stack Robust{" "}
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">
-                Solid Foundation
+                authentication starter template
               </span>
             </h1>
             <p className="mt-6 max-w-xl mx-auto lg:mx-0 text-lg text-muted-foreground">
-              This isn't just a template. It's a complete, production-ready
-              starter kit designed to save you weeks of setup. Focus on your
-              features, not the boilerplate.
+              You don't need bleeding cards to build Complex modern
+              authentication system. This is the starter template ever built
+              from scratch . It's a complete, production-ready starter kit
+              designed to save you weeks of setup. Focus on your features, not
+              the boilerplate.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
               <Button asChild size="lg">
@@ -75,6 +80,7 @@ export default function HeroSection() {
               </Button>
             </div>
           </div>
+
           <div className="hidden lg:flex justify-center">
             <div className="relative w-full max-w-md">
               <div className="absolute -inset-2 rounded-full bg-gradient-to-r from-primary to-secondary opacity-20 blur-3xl"></div>
@@ -91,7 +97,8 @@ export default function HeroSection() {
 
         {/* Feature Grid */}
         <div className="mt-24 md:mt-32">
-          <div className="text-center">
+          <TechStackShowcase />
+          <div className="text-center mt-16 ">
             <h2 className="text-3xl font-bold tracking-tight">
               Everything You Need, Out of the Box
             </h2>
