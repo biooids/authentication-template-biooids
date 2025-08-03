@@ -79,11 +79,14 @@ export default function TechStackShowcase() {
           <div className="p-6 font-mono text-sm bg-background/50">
             <div className="flex gap-2">
               <span className="text-muted-foreground">$</span>
-              <p>git clone https://github.com/biooids/your-repo</p>
+              <p>
+                git clone
+                https://github.com/biooids/authentication-template-biooids
+              </p>
             </div>
             <div className="flex gap-2 mt-4">
               <span className="text-muted-foreground">$</span>
-              <p>cd your-repo</p>
+              <p>cd authentication-template-biooids</p>
             </div>
             <div className="flex gap-2 mt-4">
               <span className="text-muted-foreground">$</span>

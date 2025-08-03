@@ -48,8 +48,8 @@ Follow these steps to get the project running locally.
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/biooids/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/biooids/authentication-template-biooids.git
+cd authentication-template-biooids
 ```
 
 ---
