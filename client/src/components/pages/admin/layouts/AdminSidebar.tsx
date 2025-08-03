@@ -1,4 +1,3 @@
-// FILE: src/components/pages/admin/layouts/AdminSidebar.tsx (Updated)
 "use client";
 
 import React from "react";
@@ -6,7 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { SystemRole } from "@/lib/features/user/userTypes";
 import { cn } from "@/lib/utils";
-import { LayoutDashboard, Users, ShieldCheck, X } from "lucide-react";
+import { LayoutDashboard, Users, ShieldCheck, X, Mail } from "lucide-react"; // 1. Import the Mail icon
 import { Button } from "@/components/ui/button";
 
 const navLinks = [
@@ -20,6 +19,13 @@ const navLinks = [
     href: "/admin/users",
     label: "Users",
     icon: Users,
+    requiredRole: [SystemRole.SUPER_ADMIN],
+  },
+  // 2. Add the new Marketing link here
+  {
+    href: "/admin/marketing",
+    label: "Marketing",
+    icon: Mail,
     requiredRole: [SystemRole.SUPER_ADMIN],
   },
 ];
@@ -40,7 +46,7 @@ export default function AdminSidebar({
   return (
     <aside
       className={cn(
-        " inset-y-0 left-0 z-40  w-64 flex-col border-r   transition-transform duration-300 ease-in-out sm:relative sm:flex sm:translate-x-0",
+        "fixed inset-y-0 left-0 z-40 flex w-64 flex-col border-r bg-background transition-transform duration-300 ease-in-out sm:relative sm:flex sm:translate-x-0",
         isMobileOpen ? "translate-x-0" : "-translate-x-full"
       )}
     >
@@ -67,7 +73,7 @@ export default function AdminSidebar({
           if (!link.requiredRole.includes(userRole)) {
             return null;
           }
-          const isActive = pathname === link.href;
+          const isActive = pathname.startsWith(link.href);
           return (
             <Link
               key={link.href}
@@ -76,7 +82,7 @@ export default function AdminSidebar({
                 "group flex items-center gap-3 rounded-md px-3 py-2.5 text-muted-foreground transition-all hover:bg-accent hover:text-foreground",
                 isActive && "bg-accent font-semibold text-foreground"
               )}
-              onClick={() => setIsMobileOpen(false)} // Close sidebar on navigation
+              onClick={() => setIsMobileOpen(false)}
             >
               <link.icon className="h-5 w-5" />
               <span>{link.label}</span>

@@ -9,6 +9,7 @@ import userReducer from "./features/user/userSlice";
 import uploadProgressReducer from "./features/upload/uploadProgressSlice";
 import uiReducer from "./features/ui/uiSlice";
 import settingsReducer from "./features/settings/settingsSlice";
+import marketingReducer from "./features/marketing/marketingSlice";
 
 // --- API Slice Imports ---
 import { authApiSlice } from "./features/auth/authApiSlice";
@@ -16,6 +17,7 @@ import { userApiSlice } from "./features/user/userApiSlice";
 import { adminApiSlice } from "./features/admin/adminApiSlice";
 import { emailApiSlice } from "./features/email/emailApiSlice";
 import { settingsApiSlice } from "./features/settings/settingsApiSlice";
+import { marketingApiSlice } from "./features/marketing/marketingApiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -25,6 +27,7 @@ export const store = configureStore({
     uploadProgress: uploadProgressReducer,
     ui: uiReducer,
     settings: settingsReducer,
+    marketing: marketingReducer,
 
     // API slice reducers
     [userApiSlice.reducerPath]: userApiSlice.reducer,
@@ -32,6 +35,7 @@ export const store = configureStore({
     [adminApiSlice.reducerPath]: adminApiSlice.reducer,
     [emailApiSlice.reducerPath]: emailApiSlice.reducer,
     [settingsApiSlice.reducerPath]: settingsApiSlice.reducer,
+    [marketingApiSlice.reducerPath]: marketingApiSlice.reducer,
   },
   // Middleware configuration to include RTK Query's capabilities
   middleware: (getDefaultMiddleware) =>
@@ -40,7 +44,8 @@ export const store = configureStore({
       .concat(authApiSlice.middleware)
       .concat(adminApiSlice.middleware)
       .concat(emailApiSlice.middleware)
-      .concat(settingsApiSlice.middleware),
+      .concat(settingsApiSlice.middleware)
+      .concat(marketingApiSlice.middleware),
 });
 
 setupListeners(store.dispatch);
