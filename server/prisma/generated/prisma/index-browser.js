@@ -158,6 +158,16 @@ exports.Prisma.EmailVerificationTokenScalarFieldEnum = {
   userId: 'userId'
 };
 
+exports.Prisma.MarketingEmailScalarFieldEnum = {
+  id: 'id',
+  subject: 'subject',
+  htmlContent: 'htmlContent',
+  appVersion: 'appVersion',
+  status: 'status',
+  sentAt: 'sentAt',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.RefreshTokenScalarFieldEnum = {
   id: 'id',
   jti: 'jti',
@@ -209,6 +219,7 @@ exports.Prisma.ModelName = {
   User: 'User',
   PasswordResetToken: 'PasswordResetToken',
   EmailVerificationToken: 'EmailVerificationToken',
+  MarketingEmail: 'MarketingEmail',
   RefreshToken: 'RefreshToken',
   UserSettings: 'UserSettings'
 };

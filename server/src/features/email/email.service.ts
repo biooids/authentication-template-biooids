@@ -23,7 +23,7 @@ class EmailService {
   /**
    * A private helper to send emails to avoid repeating the try/catch block.
    */
-  private async sendEmail(
+  public async sendEmail(
     to: string,
     subject: string,
     html: string,

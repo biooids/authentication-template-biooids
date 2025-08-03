@@ -64,6 +64,17 @@ model EmailVerificationToken {
   @@map("email_verification_tokens")
 }
 
+model MarketingEmail {
+  id          String    @id @default(uuid())
+  subject     String
+  htmlContent String    @db.Text
+  appVersion  String?
+  status      String    @default("draft")
+  sentAt      DateTime?
+  createdAt   DateTime  @default(now())
+}
+
+
 model RefreshToken {
   id        String   @id @default(uuid())
   jti       String   @unique
