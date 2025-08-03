@@ -1,13 +1,19 @@
-// FILE: src/app/(app)/admin/layout.tsx (Corrected)
 "use client";
 
 import React, { useState } from "react";
 import { useSession } from "next-auth/react";
-import { redirect } from "next/navigation";
 import { SystemRole } from "@/lib/features/user/userTypes";
 import AdminSidebar from "@/components/pages/admin/layouts/AdminSidebar";
 import { Button } from "@/components/ui/button";
-import { PanelLeft, Loader2 } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { PanelLeft, Loader2, ShieldAlert, LogIn } from "lucide-react";
+import Link from "next/link";
 
 export default function AdminLayout({
   children,
@@ -26,17 +32,78 @@ export default function AdminLayout({
     );
   }
 
+  // --- THIS IS THE FIX ---
+
+  // 1. Handle users who are not logged in at all.
+  if (status === "unauthenticated") {
+    // Instead of an instant redirect, show a clear message and a login button.
+    return (
+      <div className="flex h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-primary/10">
+              <LogIn className="h-8 w-8 text-primary" />
+            </div>
+            <CardTitle className="mt-4 text-2xl">
+              Authentication Required
+            </CardTitle>
+            <CardDescription>
+              You must be logged in to access the admin panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button asChild>
+              <Link href="/auth/login?callbackUrl=/admin">
+                Proceed to Login
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   const userRole = session?.user?.systemRole;
   const isAuthorized = userRole && userRole !== SystemRole.USER;
 
-  if (status === "unauthenticated" || !isAuthorized) {
-    redirect("/");
+  // 2. Handle logged-in users who are not authorized.
+  if (!isAuthorized) {
+    // Show a helpful message for the developer.
+    return (
+      <div className="flex h-screen items-center justify-center bg-background p-4">
+        <Card className="w-full max-w-md text-center">
+          <CardHeader>
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-destructive/10">
+              <ShieldAlert className="h-8 w-8 text-destructive" />
+            </div>
+            <CardTitle className="mt-4 text-2xl">Access Denied</CardTitle>
+            <CardDescription>
+              Your current role ({userRole}) does not have permission to access
+              the admin panel.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="rounded-lg border bg-muted p-4 text-sm text-muted-foreground">
+              <p className="font-semibold">Developer Instructions:</p>
+              <p>
+                To gain access, update your user role in the database to
+                'DEVELOPER' or 'SUPER_ADMIN' and then log in again.
+              </p>
+            </div>
+            <Button asChild variant="outline">
+              <Link href="/">Go to Homepage</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
   }
 
+  // 3. If the user is authorized, show the admin layout.
   return (
     <div className="flex min-h-screen w-full bg-muted/40">
       <AdminSidebar
-        userRole={userRole as SystemRole}
+        userRole={userRole}
         isMobileOpen={isSidebarOpen}
         setIsMobileOpen={setIsSidebarOpen}
       />
