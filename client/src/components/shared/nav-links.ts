@@ -15,6 +15,11 @@ export const navLinks = [
     label: "Home",
     icon: Home,
   },
+  {
+    href: "/about",
+    label: "About",
+    icon: Compass,
+  },
 
   {
     href: "/profile",
