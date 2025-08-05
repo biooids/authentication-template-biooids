@@ -8,6 +8,7 @@ import { createHttpError } from "../../utils/error.factory.js";
 import { logger } from "../../config/logger.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
 import { emailService } from "../email/email.service.js";
+import { UserProfile } from "./user.types.js";
 
 interface UserProfileUpdateData {
   name?: string;
@@ -25,18 +26,43 @@ export class UserService {
     return prisma.user.findUnique({ where: { email } });
   }
 
-  public async findUserByUsername(username: string, currentUserId?: string) {
+  public async findUserByUsername(
+    username: string,
+    currentUserId?: string
+  ): Promise<UserProfile | null> {
+    // <-- Explicit return type
     const user = await prisma.user.findUnique({
       where: { username },
+      include: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+        ...(currentUserId && {
+          followers: {
+            where: {
+              followerId: currentUserId,
+            },
+          },
+        }),
+      },
     });
 
     if (!user) return null;
 
-    return {
-      ...user,
-    };
-  }
+    const { _count, followers, hashedPassword, ...restOfUser } = user;
 
+    const userProfile: UserProfile = {
+      ...restOfUser,
+      followersCount: _count.followers,
+      followingCount: _count.following,
+      isFollowing: !!(currentUserId && followers.length > 0),
+    };
+
+    return userProfile;
+  }
   public async findUserById(id: string): Promise<User | null> {
     return prisma.user.findUnique({ where: { id } });
   }

@@ -8,6 +8,7 @@ import { userService } from "./user.service.js";
 import { uploadToCloudinary } from "../../config/cloudinary.js";
 import { logger } from "../../config/logger.js";
 import { config } from "../../config/index.js";
+import { followService } from "../follow/follow.service.js";
 
 // This helper is used for responses where the full user object is fetched from the DB,
 // like when getting another user's profile.
@@ -132,6 +133,24 @@ class UserController {
     }
 
     await userService.deleteUserAccount(targetUserId);
+    res.status(204).send();
+  });
+
+  followUser = asyncHandler(async (req: Request, res: Response) => {
+    const followerId = req.user!.id;
+    const { username: usernameToFollow } = req.params;
+
+    await followService.followUser(followerId, usernameToFollow);
+
+    res.status(204).send();
+  });
+
+  unfollowUser = asyncHandler(async (req: Request, res: Response) => {
+    const followerId = req.user!.id;
+    const { username: usernameToUnfollow } = req.params;
+
+    await followService.unfollowUser(followerId, usernameToUnfollow);
+
     res.status(204).send();
   });
 }

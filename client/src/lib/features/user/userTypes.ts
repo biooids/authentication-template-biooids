@@ -24,10 +24,12 @@ export type SanitizedUserDto = {
   githubUrl: string | null;
   websiteUrl: string | null;
   emailVerified: boolean;
+  followersCount: number;
+  followingCount: number;
 };
-
-// This type now accurately reflects what the backend provides for a user profile.
-export type UserProfile = SanitizedUserDto;
+export type UserProfile = SanitizedUserDto & {
+  isFollowing: boolean;
+};
 
 export type CurrentUser = SanitizedUserDto;
 
