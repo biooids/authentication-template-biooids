@@ -142,6 +142,12 @@ exports.Prisma.UserScalarFieldEnum = {
   websiteUrl: 'websiteUrl'
 };
 
+exports.Prisma.FollowsScalarFieldEnum = {
+  followerId: 'followerId',
+  followingId: 'followingId',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.PasswordResetTokenScalarFieldEnum = {
   id: 'id',
   token: 'token',
@@ -217,6 +223,7 @@ exports.ThemePreference = exports.$Enums.ThemePreference = {
 
 exports.Prisma.ModelName = {
   User: 'User',
+  Follows: 'Follows',
   PasswordResetToken: 'PasswordResetToken',
   EmailVerificationToken: 'EmailVerificationToken',
   MarketingEmail: 'MarketingEmail',

@@ -32,6 +32,8 @@ model User {
   linkedinUrl         String?
   websiteUrl          String?
 
+  following           Follows[] @relation("Following")
+  followers           Follows[] @relation("Followers")
   refreshTokens       RefreshToken[]
   settings            UserSettings?
   passwordResetTokens PasswordResetToken[]
@@ -39,7 +41,18 @@ model User {
 
   @@map("users")
 }
+model Follows {
+  followerId  String
+  followingId String
+  createdAt   DateTime @default(now())
 
+  follower    User     @relation("Following", fields: [followerId], references: [id], onDelete: Cascade)
+  following   User     @relation("Followers", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@id([followerId, followingId])
+  @@index([followerId])
+  @@index([followingId])
+}
 model PasswordResetToken {
   id        String   @id @default(uuid())
   token     String   @unique
