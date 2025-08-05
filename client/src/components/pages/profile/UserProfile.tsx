@@ -1,5 +1,3 @@
-// FILE: src/components/pages/profile/UserProfile.tsx
-
 "use client";
 
 import React, { useState } from "react";
@@ -15,6 +13,7 @@ import {
   CurrentUser,
 } from "@/lib/features/user/userTypes";
 import toast from "react-hot-toast";
+import FollowButton from "./FollowButton";
 
 // --- UI Components ---
 import { Button } from "@/components/ui/button";
@@ -33,6 +32,7 @@ import {
   Check,
   Edit,
   ImageIcon,
+  Users, // <-- Import the Users icon
 } from "lucide-react";
 
 // --- Skeleton Loader ---
@@ -42,7 +42,7 @@ const ProfileHeaderSkeleton = () => (
     <CardContent className="p-6 pt-0">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row">
         <Skeleton className="-mt-16 h-32 w-32 shrink-0 rounded-full border-4 border-background" />
-        <div className="flex w-full items-center justify-end gap-2 sm:w-auto mt-4 sm:mt-0">
+        <div className="mt-4 flex w-full items-center justify-end gap-2 sm:mt-0 sm:w-auto">
           <Skeleton className="h-10 w-24 rounded-md" />
           <Skeleton className="h-10 w-28 rounded-md" />
         </div>
@@ -105,8 +105,8 @@ const ProfileHeader = ({
             priority
           />
         ) : (
-          <div className="flex items-center justify-center h-full">
-            <ImageIcon className="w-16 h-16 text-muted-foreground/30" />
+          <div className="flex h-full items-center justify-center">
+            <ImageIcon className="h-16 w-16 text-muted-foreground/30" />
           </div>
         )}
       </div>
@@ -116,7 +116,7 @@ const ProfileHeader = ({
             <AvatarImage src={user.profileImage ?? undefined} alt={user.name} />
             <AvatarFallback>{getInitials(user.name)}</AvatarFallback>
           </Avatar>
-          <div className="flex w-full items-center justify-end gap-2 sm:w-auto mt-4 sm:mt-0">
+          <div className="mt-4 flex w-full items-center justify-end gap-2 sm:mt-0 sm:w-auto">
             <Button variant="outline" onClick={handleShare}>
               {isCopied ? (
                 <Check className="mr-2 h-4 w-4 text-green-500" />
@@ -125,12 +125,14 @@ const ProfileHeader = ({
               )}
               {isCopied ? "Copied!" : "Share"}
             </Button>
-            {isMyProfile && (
+            {isMyProfile ? (
               <Button asChild>
                 <Link href="/profile">
                   <Edit className="mr-2 h-4 w-4" /> Edit Profile
                 </Link>
               </Button>
+            ) : (
+              <FollowButton profileUser={user} currentUser={currentUser} />
             )}
           </div>
         </div>
@@ -141,7 +143,7 @@ const ProfileHeader = ({
             <p className="mt-2 text-foreground/80">{user.title}</p>
           )}
           {user.bio && <p className="mt-4 max-w-2xl">{user.bio}</p>}
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             {user.location && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> {user.location}
@@ -150,6 +152,19 @@ const ProfileHeader = ({
             <div className="flex items-center gap-2">
               <Calendar className="h-4 w-4" /> Joined{" "}
               {format(new Date(user.joinedAt), "MMMM d, yyyy")}
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="font-semibold text-foreground">
+                {user.followingCount}
+              </span>{" "}
+              Following
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-foreground">
+                {user.followersCount}
+              </span>{" "}
+              Followers
             </div>
           </div>
         </div>
@@ -205,7 +220,7 @@ export default function UserProfile() {
 
   if (isError || !user) {
     return (
-      <div className="container mx-auto py-10 flex justify-center">
+      <div className="container mx-auto flex justify-center py-10">
         <Alert variant="destructive" className="max-w-md">
           <AlertCircle className="h-4 w-4" />
           <AlertTitle>User Not Found</AlertTitle>

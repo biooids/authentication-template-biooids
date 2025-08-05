@@ -32,5 +32,7 @@ router.delete("/me", requireAuth, userController.deleteMyAccount);
 
 router.get("/:id", requireAuth, userController.getUserById);
 router.delete("/:id", requireAuth, userController.deleteUserById);
+router.post("/:username/follow", requireAuth, userController.followUser);
+router.delete("/:username/follow", requireAuth, userController.unfollowUser);
 
 export default router;

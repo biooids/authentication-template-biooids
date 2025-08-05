@@ -10,8 +10,6 @@ import { logger } from "../../config/logger.js";
 import { config } from "../../config/index.js";
 import { followService } from "../follow/follow.service.js";
 
-// This helper is used for responses where the full user object is fetched from the DB,
-// like when getting another user's profile.
 const sanitizeUserForResponse = (user: User): Omit<User, "hashedPassword"> => {
   const { hashedPassword, ...sanitizedUser } = user;
   return sanitizedUser;
@@ -25,11 +23,18 @@ class UserController {
       throw createHttpError(401, "Authenticated user not found.");
     }
 
-    const fullUser = await userService.findUserById(userId);
+    const userWithCount = await userService.findUserById(userId);
 
-    if (!fullUser) {
+    if (!userWithCount) {
       throw createHttpError(404, "User data could not be found.");
     }
+
+    const { _count, ...userWithoutCount } = userWithCount;
+    const fullUser = {
+      ...userWithoutCount,
+      followersCount: _count.followers,
+      followingCount: _count.following,
+    };
 
     res.status(200).json({
       status: "success",

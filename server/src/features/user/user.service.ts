@@ -63,10 +63,20 @@ export class UserService {
 
     return userProfile;
   }
-  public async findUserById(id: string): Promise<User | null> {
-    return prisma.user.findUnique({ where: { id } });
+  public async findUserById(id: string) {
+    return prisma.user.findUnique({
+      where: { id },
+      // Add this 'include' block to fetch the counts
+      include: {
+        _count: {
+          select: {
+            followers: true,
+            following: true,
+          },
+        },
+      },
+    });
   }
-
   public async createUser(input: SignUpInputDto): Promise<User> {
     const { email, username, password, name } = input;
 

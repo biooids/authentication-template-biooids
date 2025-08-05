@@ -15,15 +15,12 @@ import {
   Calendar,
   Edit,
   ImageIcon,
+  Users, // 1. Import the Users icon
 } from "lucide-react";
 import { SanitizedUserDto } from "@/lib/features/user/userTypes";
 
-// --- Helper Components ---
-
 /**
  * Safely gets initials from a name string.
- * @param name - The user's full name.
- * @returns A 1 or 2-letter initial string, or "?" if the name is invalid.
  */
 const getInitials = (name: string | null | undefined): string => {
   if (!name || typeof name !== "string") return "?";
@@ -37,8 +34,6 @@ const getInitials = (name: string | null | undefined): string => {
 
 /**
  * Safely formats a date string, preventing crashes.
- * @param dateString - The date string from the API.
- * @returns A formatted date string, or a fallback message if formatting fails.
  */
 const FormattedJoinDate = ({ dateString }: { dateString?: string | null }) => {
   if (!dateString || typeof dateString !== "string") {
@@ -56,15 +51,12 @@ const FormattedJoinDate = ({ dateString }: { dateString?: string | null }) => {
   }
 };
 
-// --- Main Component ---
-
 interface ProfileHeaderProps {
   user: SanitizedUserDto | null;
   onEdit: () => void;
 }
 
 export default function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
-  // If the user object is not available, don't render anything.
   if (!user) {
     return null;
   }
@@ -115,7 +107,7 @@ export default function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
 
           {user.bio && <p className="mt-4 max-w-2xl">{user.bio}</p>}
 
-          <div className="mt-4 flex flex-wrap gap-x-6 gap-y-2 text-sm text-muted-foreground">
+          <div className="mt-4 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-muted-foreground">
             {user.location && (
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> {user.location}
@@ -125,6 +117,22 @@ export default function ProfileHeader({ user, onEdit }: ProfileHeaderProps) {
               <Calendar className="h-4 w-4" /> Joined{" "}
               <FormattedJoinDate dateString={user.joinedAt} />
             </div>
+
+            {/* --- 2. ADD THE FOLLOWER COUNTS HERE --- */}
+            <div className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              <span className="font-semibold text-foreground">
+                {user.followingCount}
+              </span>{" "}
+              Following
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-semibold text-foreground">
+                {user.followersCount}
+              </span>{" "}
+              Followers
+            </div>
+            {/* --- END OF ADDITION --- */}
           </div>
         </div>
 

@@ -105,6 +105,63 @@ export const userApiSlice = createApi({
         }
       },
     }),
+
+    followUser: builder.mutation<void, string>({
+      query: (username) => ({
+        url: `/users/${username}/follow`,
+        method: "POST",
+      }),
+      async onQueryStarted(username, { dispatch, queryFulfilled }) {
+        // Pessimistic update: we wait for the server to confirm before updating the UI.
+        try {
+          await queryFulfilled;
+          // Update the profile page of the user being followed
+          dispatch(
+            userApiSlice.util.updateQueryData(
+              "getUserByUsername",
+              username,
+              (draft) => {
+                draft.isFollowing = true;
+                draft.followersCount++;
+              }
+            )
+          );
+          // Update the current user's "following" count
+          dispatch(
+            userApiSlice.util.updateQueryData("getMe", undefined, (draft) => {
+              draft.followingCount++;
+            })
+          );
+        } catch {}
+      },
+    }),
+
+    unfollowUser: builder.mutation<void, string>({
+      query: (username) => ({
+        url: `/users/${username}/follow`,
+        method: "DELETE",
+      }),
+      async onQueryStarted(username, { dispatch, queryFulfilled }) {
+        try {
+          await queryFulfilled;
+          dispatch(
+            userApiSlice.util.updateQueryData(
+              "getUserByUsername",
+              username,
+              (draft) => {
+                draft.isFollowing = false;
+                draft.followersCount--;
+              }
+            )
+          );
+          dispatch(
+            userApiSlice.util.updateQueryData("getMe", undefined, (draft) => {
+              draft.followingCount--;
+            })
+          );
+        } catch {}
+      },
+    }),
   }),
 });
 
@@ -113,4 +170,6 @@ export const {
   useUpdateMyProfileMutation,
   useDeleteMyAccountMutation,
   useGetUserByUsernameQuery,
+  useFollowUserMutation,
+  useUnfollowUserMutation,
 } = userApiSlice;
