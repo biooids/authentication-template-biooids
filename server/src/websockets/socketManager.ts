@@ -1,8 +1,12 @@
+//src/websockets/socketManager.ts
+
 import { Server, Socket } from "socket.io";
 import { Server as HttpServer } from "http";
 import jwt from "jsonwebtoken";
 import { config } from "../config/index.js";
 import { logger } from "../config/logger.js";
+// 1. IMPORT your advanced corsOptions
+import { corsOptions } from "../config/corsOptions.js";
 
 interface SocketWithUser extends Socket {
   userId?: string;
@@ -11,17 +15,10 @@ interface SocketWithUser extends Socket {
 class SocketManager {
   private io: Server | null = null;
 
-  /**
-   * Initializes the Socket.IO server, sets up middleware, and attaches listeners.
-   * This should only be called once from server.ts.
-   * @param httpServer - The Node.js HTTP server instance.
-   */
   public initialize(httpServer: HttpServer): void {
     this.io = new Server(httpServer, {
-      cors: {
-        origin: config.corsOrigin,
-        methods: ["GET", "POST"],
-      },
+      // 2. USE the imported corsOptions here
+      cors: corsOptions,
     });
 
     // Middleware for authenticating socket connections
@@ -54,11 +51,6 @@ class SocketManager {
     logger.info("✅ WebSocket server initialized.");
   }
 
-  /**
-   * Emits a notification event to a specific user's private room.
-   * @param userId - The ID of the user to notify.
-   * @param notification - The notification data to send.
-   */
   public emitNotification(userId: string, notification: any): void {
     if (this.io) {
       this.io.to(userId).emit("new_notification", notification);
@@ -69,10 +61,6 @@ class SocketManager {
     }
   }
 
-  /**
-   * Gracefully closes the Socket.IO server and all connections.
-   * @returns A promise that resolves when the server is closed.
-   */
   public close(): Promise<void> {
     return new Promise((resolve) => {
       if (this.io) {
@@ -87,5 +75,4 @@ class SocketManager {
   }
 }
 
-// Export a single instance to be used throughout the application (singleton pattern)
 export const socketManager = new SocketManager();

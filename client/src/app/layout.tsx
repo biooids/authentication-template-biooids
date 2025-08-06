@@ -12,6 +12,7 @@ import { AuthModal } from "@/components/layouts/AuthModal";
 import { Toaster } from "react-hot-toast";
 import AuthErrorHandler from "@/components/layouts/AuthErrorHandler";
 import UnverifiedEmailBanner from "@/components/shared/UnverifiedEmailBanner";
+import SocketProvider from "@/components/layouts/SocketProvider";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,22 +41,24 @@ export default function RootLayout({
       >
         <ReduxProvider>
           <SessionProviderWrapper>
-            <ThemeProvider
-              attribute="class"
-              defaultTheme="dark"
-              enableSystem
-              disableTransitionOnChange
-            >
-              <AuthErrorHandler />
+            <SocketProvider>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="dark"
+                enableSystem
+                disableTransitionOnChange
+              >
+                <AuthErrorHandler />
 
-              <Toaster position="top-center" />
-              <NextAuthSync />
-              <AuthInitializer>
-                <UnverifiedEmailBanner />
-                {children}
-              </AuthInitializer>
-              <AuthModal />
-            </ThemeProvider>
+                <Toaster position="top-center" />
+                <NextAuthSync />
+                <AuthInitializer>
+                  <UnverifiedEmailBanner />
+                  {children}
+                </AuthInitializer>
+                <AuthModal />
+              </ThemeProvider>
+            </SocketProvider>
           </SessionProviderWrapper>
         </ReduxProvider>
       </body>

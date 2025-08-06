@@ -7,6 +7,7 @@ import {
   LayoutGrid,
   Bookmark,
   Compass,
+  Bell,
 } from "lucide-react";
 
 export const navLinks = [
@@ -30,6 +31,11 @@ export const navLinks = [
     href: "/admin",
     label: "Admin",
     icon: LayoutGrid,
+  },
+  {
+    href: "/notifications",
+    label: "Notifications",
+    icon: Bell,
   },
 ];
 

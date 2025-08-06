@@ -6,6 +6,7 @@ import ThemeToggler from "./ThemeToggler";
 import { UserAccountNav } from "./UserAccountNav"; // Import the correct component
 import { useAppSelector } from "@/lib/hooks/hooks";
 import { selectCurrentUser } from "@/lib/features/user/userSlice";
+import NotificationBell from "./NotificationBell";
 
 export default function Header() {
   // Get the user data here, in the parent component.
@@ -34,7 +35,7 @@ export default function Header() {
         {/* === Right Side === */}
         <div className="flex items-center gap-2 md:gap-4">
           <ThemeToggler />
-          {/* Pass the user down as a prop. */}
+          <NotificationBell />
           <UserAccountNav user={currentUser} />
         </div>
       </div>
