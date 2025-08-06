@@ -174,6 +174,15 @@ exports.Prisma.MarketingEmailScalarFieldEnum = {
   createdAt: 'createdAt'
 };
 
+exports.Prisma.NotificationScalarFieldEnum = {
+  id: 'id',
+  content: 'content',
+  isRead: 'isRead',
+  url: 'url',
+  createdAt: 'createdAt',
+  userId: 'userId'
+};
+
 exports.Prisma.RefreshTokenScalarFieldEnum = {
   id: 'id',
   jti: 'jti',
@@ -227,6 +236,7 @@ exports.Prisma.ModelName = {
   PasswordResetToken: 'PasswordResetToken',
   EmailVerificationToken: 'EmailVerificationToken',
   MarketingEmail: 'MarketingEmail',
+  Notification: 'Notification',
   RefreshToken: 'RefreshToken',
   UserSettings: 'UserSettings'
 };

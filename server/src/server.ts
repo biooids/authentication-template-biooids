@@ -4,9 +4,13 @@ import app from "./app.js";
 import { config } from "./config/index.js";
 import { disconnectPrisma, connectPrisma } from "./db/prisma.js";
 import { logger } from "./config/logger.js";
+import { socketManager } from "./websockets/socketManager.js";
 
 const PORT = config.port;
-const server = http.createServer(app);
+const httpServer = http.createServer(app);
+
+// Initialize the entire WebSocket system with one line
+socketManager.initialize(httpServer);
 
 let isShuttingDown = false;
 
@@ -18,8 +22,11 @@ async function startServer() {
     // connectPrisma will log its own success/error messages
     await connectPrisma();
 
-    server.listen(PORT, () => {
-      logger.info(`🚀 Server listening on http://localhost:${PORT}`);
+    // The httpServer (which includes the Express app) starts listening
+    httpServer.listen(PORT, () => {
+      logger.info(
+        `🚀 Server (HTTP + WebSocket) listening on http://localhost:${PORT}`
+      );
     });
   } catch (error) {
     // If the initial DB connection fails, it's a fatal error.
@@ -52,10 +59,13 @@ const performGracefulShutdown = async (signalSource: string) => {
   }, 10000);
 
   try {
-    // 1. Close the HTTP server
+    // First, close the WebSocket connections
+    await socketManager.close();
+
+    // Then, close the main HTTP server
     logger.info("🔌 Attempting to close HTTP server...");
     await new Promise<void>((resolve) => {
-      server.close((err?: Error & { code?: string }) => {
+      httpServer.close((err?: Error & { code?: string }) => {
         if (err) {
           if (err.code === "ERR_SERVER_NOT_RUNNING") {
             logger.warn("⚠️ HTTP server was already not running or closed.");
@@ -69,10 +79,10 @@ const performGracefulShutdown = async (signalSource: string) => {
       });
     });
 
-    // 2. Disconnect from the database (disconnectPrisma logs its own status)
+    // Disconnect from the database
     await disconnectPrisma();
 
-    // 3. Clear the timeout and exit successfully
+    // Clear the timeout and exit successfully
     clearTimeout(shutdownTimeout);
     logger.info("🚪 All services closed successfully. Exiting process...");
     process.exit(0);
@@ -89,7 +99,6 @@ const performGracefulShutdown = async (signalSource: string) => {
  * @param error The actual error object.
  */
 const criticalErrorHandler = (errorType: string, error: Error | any) => {
-  // Log the catastrophic error with the full error object
   logger.fatal(
     { err: error },
     `💥 ${errorType}! Attempting graceful shutdown...`
@@ -97,14 +106,12 @@ const criticalErrorHandler = (errorType: string, error: Error | any) => {
 
   if (!isShuttingDown) {
     performGracefulShutdown(errorType).catch(() => {
-      // This catch is a last resort if the shutdown itself fails.
       logger.fatal(
         "Force exiting after critical error and failed graceful shutdown."
       );
       process.exit(1);
     });
 
-    // Another safety net to force exit if graceful shutdown hangs after a critical error.
     setTimeout(() => {
       logger.error(`Force exiting after ${errorType} (7s timeout).`);
       process.exit(1);

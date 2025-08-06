@@ -8,6 +8,7 @@ import adminRoutes from "../features/admin/admin.routes.js";
 import emailRoutes from "../features/email/email.routes.js";
 import settingsRoutes from "../features/settings/settings.routes.js";
 import marketingRoutes from "../features/marketing/marketing.routes.js";
+import notificationRoutes from "../features/notifications/notifications.routes.js";
 
 // Main API router that aggregates all feature routes
 // This router is used to handle all API requests in the application.
@@ -29,5 +30,6 @@ router.use("/admin", adminRoutes);
 router.use("/email", emailRoutes);
 router.use("/settings", settingsRoutes);
 router.use("/marketing", marketingRoutes);
+router.use("/notifications", notificationRoutes);
 
 export default router;

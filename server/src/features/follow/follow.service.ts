@@ -1,6 +1,8 @@
+//src/features/follow/follow.service.ts
 import prisma from "../../db/prisma.js";
 import { createHttpError } from "../../utils/error.factory.js";
 import { userService } from "../user/user.service.js";
+import { notificationService } from "../notifications/notifications.service.js";
 
 class FollowService {
   /**
@@ -13,33 +15,34 @@ class FollowService {
     if (!userToFollow) {
       throw createHttpError(404, "User to follow not found.");
     }
-
     if (followerId === userToFollow.id) {
       throw createHttpError(400, "You cannot follow yourself.");
     }
 
     const existingFollow = await prisma.follows.findUnique({
       where: {
-        followerId_followingId: {
-          followerId: followerId,
-          followingId: userToFollow.id,
-        },
+        followerId_followingId: { followerId, followingId: userToFollow.id },
       },
     });
 
     if (existingFollow) {
-      // The user is already followed, so we can just return successfully.
       return;
     }
 
     await prisma.follows.create({
-      data: {
-        followerId: followerId,
-        followingId: userToFollow.id,
-      },
+      data: { followerId, followingId: userToFollow.id },
     });
-  }
 
+    const follower = await userService.findUserById(followerId);
+    if (follower) {
+      // This call correctly triggers the notification creation and the real-time event
+      await notificationService.createNotification(
+        userToFollow.id,
+        `@${follower.username} started following you.`,
+        `/profile/${follower.username}`
+      );
+    }
+  }
   /**
    * Deletes a follow relationship between two users.
    * @param followerId - The ID of the user initiating the unfollow.

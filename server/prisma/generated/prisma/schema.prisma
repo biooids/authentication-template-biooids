@@ -12,25 +12,26 @@ datasource db {
 }
 
 model User {
-  id             String     @id @default(uuid())
+  id             String         @id @default(uuid())
   name           String
-  username       String     @unique
-  email          String     @unique
-  emailVerified  Boolean    @default(false)
+  username       String         @unique
+  email          String         @unique
+  emailVerified  Boolean        @default(false)
   hashedPassword String?
   bio            String?
   title          String?
   location       String?
-  profileImage   String?    @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
-  bannerImage    String?    @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
-  joinedAt       DateTime   @default(now()) @map("joined_at")
-  updatedAt      DateTime   @updatedAt
-  systemRole     SystemRole @default(USER)
+  profileImage   String?        @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
+  bannerImage    String?        @default("https://res.cloudinary.com/djtww0vax/image/upload/v1747766773/xi-biooid_bstapi.jpg")
+  joinedAt       DateTime       @default(now()) @map("joined_at")
+  updatedAt      DateTime       @updatedAt
+  systemRole     SystemRole     @default(USER)
   deactivatedAt  DateTime?
   twitterUrl     String?
   githubUrl      String?
   linkedinUrl    String?
   websiteUrl     String?
+  notifications  Notification[]
 
   following               Follows[]                @relation("Following")
   followers               Follows[]                @relation("Followers")
@@ -87,6 +88,19 @@ model MarketingEmail {
   status      String    @default("draft")
   sentAt      DateTime?
   createdAt   DateTime  @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  content   String
+  isRead    Boolean  @default(false)
+  url       String?
+  createdAt DateTime @default(now())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
 }
 
 model RefreshToken {

@@ -31,6 +31,7 @@ model User {
   githubUrl           String?
   linkedinUrl         String?
   websiteUrl          String?
+  notifications       Notification[]
 
   following           Follows[] @relation("Following")
   followers           Follows[] @relation("Followers")
@@ -86,7 +87,18 @@ model MarketingEmail {
   sentAt      DateTime?
   createdAt   DateTime  @default(now())
 }
+model Notification {
+  id        String   @id @default(uuid())
+  content   String   
+  isRead    Boolean  @default(false)
+  url       String?  
+  createdAt DateTime @default(now())
 
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
 
 model RefreshToken {
   id        String   @id @default(uuid())
