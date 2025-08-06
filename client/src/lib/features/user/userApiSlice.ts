@@ -15,6 +15,7 @@ import type {
   GetMeApiResponse,
   UpdateProfileApiResponse,
   UserProfile,
+  FollowUser,
 } from "./userTypes";
 
 export const userApiSlice = createApi({
@@ -162,6 +163,18 @@ export const userApiSlice = createApi({
         } catch {}
       },
     }),
+
+    getFollowing: builder.query<FollowUser[], string>({
+      query: (username) => `/users/${username}/following`,
+      transformResponse: (response: { data: { following: FollowUser[] } }) =>
+        response.data.following,
+    }),
+
+    getFollowers: builder.query<FollowUser[], string>({
+      query: (username) => `/users/${username}/followers`,
+      transformResponse: (response: { data: { followers: FollowUser[] } }) =>
+        response.data.followers,
+    }),
   }),
 });
 
@@ -172,4 +185,6 @@ export const {
   useGetUserByUsernameQuery,
   useFollowUserMutation,
   useUnfollowUserMutation,
+  useGetFollowingQuery,
+  useGetFollowersQuery,
 } = userApiSlice;

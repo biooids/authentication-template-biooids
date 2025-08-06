@@ -71,6 +71,58 @@ class FollowService {
         return;
       });
   }
+
+  /**
+   * Gets the list of users that a specific user is following.
+   * @param username - The username of the user whose following list we want.
+   */
+  public async getFollowing(username: string) {
+    return prisma.user.findUnique({
+      where: { username },
+      select: {
+        following: {
+          select: {
+            following: {
+              // This gets the profile of the user being followed
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                profileImage: true,
+                bio: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
+
+  /**
+   * Gets the list of users who are following a specific user.
+   * @param username - The username of the user whose followers we want.
+   */
+  public async getFollowers(username: string) {
+    return prisma.user.findUnique({
+      where: { username },
+      select: {
+        followers: {
+          select: {
+            follower: {
+              // This gets the profile of the user who is following
+              select: {
+                id: true,
+                name: true,
+                username: true,
+                profileImage: true,
+                bio: true,
+              },
+            },
+          },
+        },
+      },
+    });
+  }
 }
 
 export const followService = new FollowService();

@@ -153,19 +153,24 @@ const ProfileHeader = ({
               <Calendar className="h-4 w-4" /> Joined{" "}
               {format(new Date(user.joinedAt), "MMMM d, yyyy")}
             </div>
-            <div className="flex items-center gap-2">
-              <Users className="h-4 w-4" />
+            <Link
+              href={`/profile/${user.username}/following`}
+              className="flex items-center gap-2 hover:text-primary"
+            >
               <span className="font-semibold text-foreground">
                 {user.followingCount}
-              </span>{" "}
+              </span>
               Following
-            </div>
-            <div className="flex items-center gap-2">
+            </Link>
+            <Link
+              href={`/profile/${user.username}/followers`}
+              className="flex items-center gap-2 hover:text-primary"
+            >
               <span className="font-semibold text-foreground">
                 {user.followersCount}
-              </span>{" "}
+              </span>
               Followers
-            </div>
+            </Link>
           </div>
         </div>
         <div className="mt-6 flex items-center gap-2">

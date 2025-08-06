@@ -58,3 +58,10 @@ export interface GetUserApiResponse {
   status: string;
   data: UserProfile;
 }
+export interface FollowUser {
+  id: string;
+  name: string;
+  username: string;
+  profileImage: string | null;
+  bio: string | null;
+}
