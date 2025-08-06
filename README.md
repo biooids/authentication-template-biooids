@@ -59,8 +59,9 @@ Ensure the following are installed on your system:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/biooids/your-repo-name.git
-cd your-repo-name
+git clone https://github.com/biooids/authentication-template-biooids.git
+
+cd authentication-template-biooids
 ```
 
 ---
@@ -112,9 +113,9 @@ pnpm dev
 ### 🔖 Add Badges
 
 ```markdown
-![GitHub License](https://img.shields.io/github/license/biooids/your-repo-name)
-![GitHub Stars](https://img.shields.io/github/stars/biooids/your-repo-name)
-![GitHub Issues](https://img.shields.io/github/issues/biooids/your-repo-name)
+![GitHub License](https://img.shields.io/github/license/biooids/authentication-template-biooids)
+![GitHub Stars](https://img.shields.io/github/stars/biooids/authentication-template-biooids)
+![GitHub Issues](https://img.shields.io/github/issues/biooids/authentication-template-biooids)
 ```
 
 ### 📄 Choose a License
@@ -167,7 +168,7 @@ Thanks to the tools and frameworks powering this project:
 ## 📬 Questions or Support?
 
 Need help?  
-Open an issue at: [GitHub Issues](https://github.com/biooids/your-repo-name/issues)
+Open an issue at: [GitHub Issues](https://github.com/biooids/authentication-template-biooids/issues)
 
 ---
 
