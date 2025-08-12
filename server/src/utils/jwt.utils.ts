@@ -12,7 +12,7 @@ import prisma from "../db/prisma.js";
 import {
   DecodedAccessTokenPayload,
   DecodedRefreshTokenPayload,
-} from "../types/auth.types.js";
+} from "../features/auth/auth.types.js";
 import { createHttpError } from "./error.factory.js";
 import { HttpError } from "./HttpError.js";
 import { logger } from "../config/logger.js";

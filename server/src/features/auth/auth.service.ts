@@ -18,7 +18,7 @@ import {
   AuthTokens,
   LogoutInputDto,
   ChangePasswordInputDto,
-} from "../../types/auth.types.js";
+} from "./auth.types.js";
 import { userService } from "../user/user.service.js";
 import { emailService } from "../email/email.service.js";
 

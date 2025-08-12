@@ -6,7 +6,7 @@ import prisma from "../db/prisma.js";
 import { config } from "../config/index.js";
 import { asyncHandler } from "./asyncHandler.js";
 import { createHttpError } from "../utils/error.factory.js";
-import { DecodedAccessTokenPayload } from "../types/auth.types.js";
+import { DecodedAccessTokenPayload } from "../features/auth/auth.types.js";
 
 interface AuthOptions {
   required?: boolean;

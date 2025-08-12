@@ -3,7 +3,7 @@
 import bcrypt from "bcryptjs";
 import { Prisma, User } from "@/prisma-client";
 import prisma from "../../db/prisma.js";
-import { SignUpInputDto } from "../../types/auth.types.js";
+import { SignUpInputDto } from "../auth/auth.types.js";
 import { createHttpError } from "../../utils/error.factory.js";
 import { logger } from "../../config/logger.js";
 import { deleteFromCloudinary } from "../../config/cloudinary.js";
